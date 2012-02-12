@@ -83,7 +83,6 @@ boolean checkGameRunning() {
 	Serial.println("Game Not Running");
 	timeGameStarted = 0;
 	return (false);
-
 }
 
 /*SETUP*/
@@ -109,18 +108,13 @@ void setup() {
 void loop()
 {
 	checkReadings();	
-	boolean GameRunning = checkGameRunning();
 	
-	
-	
-	
-	
-	for (int lane = 0; lane < lanes; lane++)
+	if (checkGameRunning() == true)
 	{
-		
+		for (int lane = 0; lane < lanes; lane++)
+		{
+			Serial.println("IN THE GAME");
+		}
 	}
-	
-	
-	
 }
 
