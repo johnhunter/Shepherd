@@ -1,9 +1,18 @@
 
 
 const int lanes = 3;
+
+
 /*READING VALUES*/
 
-int readings[lanes] = {0};
+
+const int numReadings = 10;
+
+int readings[lanes][numReadings] = {0};      // the readings from the analog input
+int latestReadings[lanes] = {0};
+int index = 0;                  // the index of the current reading
+int total [lanes] = {0};                  // the running total
+int average [lanes]= {0};                // the average
 
 
 /*PINS*/
@@ -18,16 +27,35 @@ const int solenoidPin[lanes][2] = {3,4,5,6,7,8};
 /*FUNCTIONS*/
 
 void checkReadings() {
-	Serial.println();
-	for (int lane = 0; lane < lanes; lane++)
-	{
-		readings[lane] = analogRead(ldrPin[lane]);
+	
+	Serial.println(millis());
+	
+	for (int lane = 0; lane < lanes; lane++) {
 		
-		Serial.print(readings[lane]);
+		// subtract the last reading:
+		total[lane] = total[lane] - readings[lane][index];         
+		// read from the sensor:  
+		readings[lane][index] = latestReadings[lane] = analogRead(ldrPin[lane]); 
+		// add the reading to the total:
+		total[lane]= total[lane] + readings[lane][index];
+
+		// calculate the average:
+		average[lane] = total[lane] / numReadings;
+		
+		Serial.print(readings[lane][index]);
+		Serial.print(";");
+		Serial.print(average[lane]);
 		Serial.print(";");
 	}
-}
+	
+	// advance to the next position in the array:  
+	index = index + 1;                    
 
+	// if we're at the end of the array...
+	if (index >= numReadings)              
+	// ...wrap around to the beginning: 
+	index = 0;
+}
 
 /*SETUP*/
 
