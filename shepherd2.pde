@@ -50,6 +50,7 @@ const int onLedPin = 8;
 const int offLedPin = 9;
 const int ldrPin[lanes] = {A0, A1, A2};
 const int solenoidPin[lanes][2] = {3,4,5,6,7,8};
+const int holdTime = 500;
 
 
 
@@ -124,6 +125,8 @@ void checkForSheep() {
 			//create sheep
 			sheepActive[lane] = true;
 			sheepList[lane][startColumn][sheepIndex[lane]] = millis();
+			sheepList[lane][endColumn][sheepIndex[lane]] = 0;
+			
 		}
 		
 		if (sheepActive[lane] == true && latestReadings[lane] < baselineThresholds[lane] + sheepThreshold)
@@ -145,16 +148,43 @@ void checkForSheep() {
 void fireSolenoids() {
 	Serial.println("Checking whether to fire solenoids");
 	
+	unsigned long sheepSpottedTime, sheepEndedTime, sheepExpectedFirst, sheepExpectedSecond = 0;
 	for (int lane = 0; lane < lanes; lane++)
 	{
 		// calculate speeds and times
-		unsigned long sheepSpottedTime = sheepList[lane][startColumn][sheepNext[lane]];
+		unsigned sheepSpottedTime = sheepList[lane][startColumn][sheepNext[lane]];
 		unsigned long sheepEndedTime = sheepList[lane][endColumn][sheepNext[lane]];
 		
 		int speed = (sheepEndedTime - sheepSpottedTime) / sheepWidth;
-		unsigned long (sheepExpectedFirst) = sheepEndedTime + (firstDistance[lane] / speed);
-		unsigned long (sheepExpectedSecond)	= sheepEndedTime + (secondDistance[lane] / speed);
+		unsigned long sheepExpectedFirst = sheepEndedTime + (firstDistance[lane] / speed);
+		unsigned long sheepExpectedSecond = sheepEndedTime + (secondDistance[lane] / speed);
+		
+		if (millis() > sheepExpectedFirst && millis() < (sheepExpectedFirst + holdTime)) {
+			digitalWrite(solenoidPin[lane][0], HIGH);
+			Serial.println("Solenoid down");
 		}
+			else if (millis() > (sheepExpectedFirst + holdTime)){
+			digitalWrite(solenoidPin[lane][0], LOW);
+			Serial.println("Solenoid up");
+		}
+		
+		if (millis() > sheepExpectedSecond && millis() < (sheepExpectedSecond + holdTime)) {
+			digitalWrite(solenoidPin[lane][1], HIGH);
+			Serial.println("Solenoid down");
+			
+		}
+		
+		else if (millis() > (sheepExpectedSecond + holdTime)) {
+			digitalWrite(solenoidPin[lane][1], LOW);
+			Serial.println("Solenoid down");
+			
+			sheepNext[lane]++;
+			
+			if (sheepNext[lane] >= sheepBuffer) {
+				sheepIndex[lane] = 0;
+			}
+		}
+	}	
 }
 
 /*SETUP*/
@@ -189,12 +219,9 @@ void loop()
             {
                 baselineThresholds[lane] = average[lane];
             }
-             
-            else {
-                checkForSheep();
-                fireSolenoids();
-            }
         }
-    }
+    	checkForSheep();
+        fireSolenoids();
+	}
 }
 
