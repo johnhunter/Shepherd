@@ -7,8 +7,8 @@ const int lanes = 3;
 
 const int numReadings = 10;
 
-int readings[lanes][numReadings] = {0};      // the readings from the analog input
 int latestReadings[lanes] = {0};
+int readings[lanes][numReadings] = {0};      // the readings from the analog input
 int index = 0;                  // the index of the current reading
 int total [lanes] = {0};                  // the running total
 int average [lanes]= {0};                // the average
@@ -17,6 +17,8 @@ int average [lanes]= {0};                // the average
 
 const int lowThreshold = 100;
 const int highThreshold = 600;
+
+unsigned long timeGameStarted = 0;
 
 /*PINS*/
 
@@ -64,12 +66,24 @@ boolean checkGameRunning() {
 	for (int lane = 0; lane < lanes; lane++){
 		
 		if (latestReadings[lane] > lowThreshold && latestReadings[lane] < highThreshold) {
-			Serial.println("Game Running");
-			return (true);
+			if (timeGameStarted == 0)
+			{
+				timeGameStarted = millis();
+				Serial.println("Game Started");
+				return(true);
+			}
+			else 
+			{
+				Serial.println("Game Running");
+				return (true);
+			}
 		}
 	}
+	
 	Serial.println("Game Not Running");
+	timeGameStarted = 0;
 	return (false);
+
 }
 
 /*SETUP*/
