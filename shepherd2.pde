@@ -5,7 +5,6 @@ const int lanes = 3;
 
 /*READING VALUES*/
 
-
 const int numReadings = 10;
 
 int readings[lanes][numReadings] = {0};      // the readings from the analog input
@@ -14,6 +13,10 @@ int index = 0;                  // the index of the current reading
 int total [lanes] = {0};                  // the running total
 int average [lanes]= {0};                // the average
 
+/*GAME STARTED*/
+
+const int lowThreshold = 100;
+const int highThreshold = 600;
 
 /*PINS*/
 
@@ -57,6 +60,18 @@ void checkReadings() {
 	index = 0;
 }
 
+boolean checkGameRunning() {
+	for (int lane = 0; lane < lanes; lane++){
+		
+		if (latestReadings[lane] > lowThreshold && latestReadings[lane] < highThreshold) {
+			Serial.println("Game Running");
+			return (true);
+		}
+	}
+	Serial.println("Game Not Running");
+	return (false);
+}
+
 /*SETUP*/
 
 void setup() {
@@ -79,10 +94,12 @@ void setup() {
 
 void loop()
 {
-	checkReadings();
+	checkReadings();	
+	boolean GameRunning = checkGameRunning();
 	
-	digitalWrite (onLedPin, HIGH); 
-	digitalWrite (offLedPin, HIGH); 
+	
+	
+	
 	
 	for (int lane = 0; lane < lanes; lane++)
 	{
