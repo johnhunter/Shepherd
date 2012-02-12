@@ -26,6 +26,7 @@ int baselineThresholds[lanes] = {0};
 /*SHEEP ARRAY*/
 
 const int sheepThreshold = 100;
+int latestSheep[lanes] = {0};
 const int sheepBuffer = 20;
 int sheepList[3][sheepBuffer];
 int laneColumn = 0; 
@@ -108,25 +109,11 @@ void checkForSheep() {
 	
 	for (int lane = 0; lane < lanes; lane++)
 	{
-		if (latestReadings[lane] > (baselineThresholds[lane] + sheepThreshold))
-		{
-			for (int i = 0; i < sheepBuffer; i++)
-			{
-				//if there's a sheep aleady - set the end time;
-				if(sheepList[laneColumn][i] == lane && sheepList[endColumn][i] != 0) {
-					sheepList[endColumn][i] = millis();
-					break; 
-				}
-				//if there's not a sheep without an end time create a new sheep; 
-				else if (sheepList[laneColumn])	{
-					
-				}	
-			}
-		}
+		
 	}
 }
 
-void fireServers() {
+void fireSolenoids() {
 	Serial.println("Checking whether to fire solenoids");
 }
 
@@ -152,22 +139,22 @@ void setup() {
 
 void loop()
 {
-	checkReadings();	
-	
-	if (checkGameRunning() == true)
-	{
-		for (int lane = 0; lane < lanes; lane++)
-		{
-			if (millis() < (timeGameStarted + startPeriod))
-			{
-				baselineThresholds[lane] = average[lane];
-			}
-			
-			else {
-				checkForSheep();
-				fireServers();
-			}
-		}
-	}
+    checkReadings();    
+     
+    if (checkGameRunning() == true)
+    {
+        for (int lane = 0; lane < lanes; lane++)
+        {
+            if (millis() < (timeGameStarted + startPeriod))
+            {
+                baselineThresholds[lane] = average[lane];
+            }
+             
+            else {
+                checkForSheep();
+                fireServers();
+            }
+        }
+    }
 }
 
