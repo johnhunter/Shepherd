@@ -20,6 +20,18 @@ const int highThreshold = 600;
 
 unsigned long timeGameStarted = 0;
 
+const int startPeriod = 2000;
+int baselineThresholds[lanes] = {0}; 
+
+/*SHEEP ARRAY*/
+
+const int sheepBuffer = 20;
+int sheepList [3][sheepBuffer];
+int laneColumn = 0; 
+int startColumn = 0; 
+int endColumn = 0; 
+
+
 /*PINS*/
 
 const int onLedPin = 9;
@@ -74,6 +86,7 @@ boolean checkGameRunning() {
 			}
 			else 
 			{
+				Serial.println();
 				Serial.println("Game Running");
 				return (true);
 			}
@@ -83,6 +96,14 @@ boolean checkGameRunning() {
 	Serial.println("Game Not Running");
 	timeGameStarted = 0;
 	return (false);
+}
+
+void checkForSheep() {
+	Serial.println("Checking for sheep");
+}
+
+void fireServers() {
+	Serial.println("Checking whether to fire solenoids");
 }
 
 /*SETUP*/
@@ -113,7 +134,15 @@ void loop()
 	{
 		for (int lane = 0; lane < lanes; lane++)
 		{
-			Serial.println("IN THE GAME");
+			if (millis() < (timeGameStarted + startPeriod))
+			{
+				baselineThresholds[lane] = average[lane];
+			}
+			
+			else {
+				checkForSheep();
+				fireServers();
+			}
 		}
 	}
 }
