@@ -35,6 +35,13 @@ int startColumn = 0;
 int endColumn = 1;
 
 int sheepIndex[lanes] = {0};
+int sheepNext[lanes] = {0};
+
+/*SOLENOID FIRER*/
+const int sheepWidth = {10};
+const int firstDistance [lanes] = {25, 30, 30};
+const int secondDistance[lanes] = {30, 40, 50};
+
 
 
 /*PINS*/
@@ -126,8 +133,7 @@ void checkForSheep() {
 			sheepActive[lane] = false;
 			sheepIndex[lane]++;
 			Serial.println("Sheep passed");
-			delay(4000);
-			
+						
 			if (sheepIndex[lane] >= sheepBuffer)
 			{
 				sheepIndex[lane] = 0;
@@ -138,6 +144,17 @@ void checkForSheep() {
 
 void fireSolenoids() {
 	Serial.println("Checking whether to fire solenoids");
+	
+	for (int lane = 0; lane < lanes; lane++)
+	{
+		// calculate speeds and times
+		unsigned long sheepSpottedTime = sheepList[lane][startColumn][sheepNext[lane]];
+		unsigned long sheepEndedTime = sheepList[lane][endColumn][sheepNext[lane]];
+		
+		int speed = (sheepEndedTime - sheepSpottedTime) / sheepWidth;
+		unsigned long (sheepExpectedFirst) = sheepEndedTime + (firstDistance[lane] / speed);
+		unsigned long (sheepExpectedSecond)	= sheepEndedTime + (secondDistance[lane] / speed);
+		}
 }
 
 /*SETUP*/
