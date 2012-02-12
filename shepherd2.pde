@@ -26,12 +26,15 @@ int baselineThresholds[lanes] = {0};
 /*SHEEP ARRAY*/
 
 const int sheepThreshold = 100;
-int latestSheep[lanes] = {0};
-const int sheepBuffer = 20;
-int sheepList[3][sheepBuffer];
-int laneColumn = 0; 
-int startColumn = 1; 
-int endColumn = 2; 
+const int sheepBuffer = 5;
+
+boolean sheepActive[lanes] = {false};
+
+int sheepList[lanes][2][sheepBuffer] = {0};
+int startColumn = 0; 
+int endColumn = 1;
+
+int sheepIndex[lanes] = {0};
 
 
 /*PINS*/
@@ -111,10 +114,24 @@ void checkForSheep() {
 	{
 		if (latestReadings[lane] > (baselineThresholds[lane] + sheepThreshold))
 		{
-
-			Serial.println("Updating sheep");
-			delay(1000);
-
+			//create sheep
+			sheepActive[lane] = true;
+			sheepList[lane][startColumn][sheepIndex[lane]] = millis();
+		}
+		
+		if (sheepActive[lane] == true && latestReadings[lane] < baselineThresholds[lane] + sheepThreshold)
+		{
+			//end sheep
+			sheepList[lane][startColumn][sheepIndex[lane]] = millis();
+			sheepActive[lane] = false;
+			sheepIndex[lane]++;
+			Serial.println("Sheep passed");
+			delay(4000);
+			
+			if (sheepIndex[lane] >= sheepBuffer)
+			{
+				sheepIndex[lane] = 0;
+			}
 		}
 	}
 }
