@@ -25,17 +25,18 @@ int baselineThresholds[lanes] = {0};
 
 /*SHEEP ARRAY*/
 
+const int sheepThreshold = 100;
 const int sheepBuffer = 20;
-int sheepList [3][sheepBuffer];
+int sheepList[3][sheepBuffer];
 int laneColumn = 0; 
-int startColumn = 0; 
-int endColumn = 0; 
+int startColumn = 1; 
+int endColumn = 2; 
 
 
 /*PINS*/
 
-const int onLedPin = 9;
-const int offLedPin = 8;
+const int onLedPin = 8;
+const int offLedPin = 9;
 const int ldrPin[lanes] = {A0, A1, A2};
 const int solenoidPin[lanes][2] = {3,4,5,6,7,8};
 
@@ -88,6 +89,8 @@ boolean checkGameRunning() {
 			{
 				Serial.println();
 				Serial.println("Game Running");
+				digitalWrite(onLedPin, HIGH);
+				digitalWrite(offLedPin, LOW);
 				return (true);
 			}
 		}
@@ -95,11 +98,32 @@ boolean checkGameRunning() {
 	
 	Serial.println("Game Not Running");
 	timeGameStarted = 0;
+	digitalWrite(onLedPin, LOW);
+	digitalWrite(offLedPin, HIGH);
 	return (false);
 }
 
 void checkForSheep() {
 	Serial.println("Checking for sheep");
+	
+	for (int lane = 0; lane < lanes; lane++)
+	{
+		if (latestReadings[lane] > (baselineThresholds[lane] + sheepThreshold))
+		{
+			for (int i = 0; i < sheepBuffer; i++)
+			{
+				//if there's a sheep aleady - set the end time;
+				if(sheepList[laneColumn][i] == lane && sheepList[endColumn][i] != 0) {
+					sheepList[endColumn][i] = millis();
+					break; 
+				}
+				//if there's not a sheep without an end time create a new sheep; 
+				else if (sheepList[laneColumn])	{
+					
+				}	
+			}
+		}
+	}
 }
 
 void fireServers() {
