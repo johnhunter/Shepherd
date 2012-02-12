@@ -109,7 +109,13 @@ void checkForSheep() {
 	
 	for (int lane = 0; lane < lanes; lane++)
 	{
-		
+		if (latestReadings[lane] > (baselineThresholds[lane] + sheepThreshold))
+		{
+
+			Serial.println("Updating sheep");
+			delay(1000);
+
+		}
 	}
 }
 
@@ -152,7 +158,7 @@ void loop()
              
             else {
                 checkForSheep();
-                fireServers();
+                fireSolenoids();
             }
         }
     }
