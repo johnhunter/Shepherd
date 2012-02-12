@@ -2,6 +2,11 @@
 
 const int lanes = 3;
 
+/*BUZZER*/
+
+const int buzzerFrequency  = 500; 
+const int buzzerTime = 200;
+
 
 /*READING VALUES*/
 
@@ -41,7 +46,7 @@ int sheepNext[lanes] = {0};
 const int sheepWidth = {10};
 const int firstDistance [lanes] = {25, 30, 30};
 const int secondDistance[lanes] = {30, 40, 50};
-
+const int holdTime = 500;
 
 
 /*PINS*/
@@ -50,11 +55,14 @@ const int onLedPin = 8;
 const int offLedPin = 9;
 const int ldrPin[lanes] = {A0, A1, A2};
 const int solenoidPin[lanes][2] = {3,4,5,6,7,8};
-const int holdTime = 500;
-
+const int buzzerPin = 10;
 
 
 /*FUNCTIONS*/
+
+void beep() {
+	tone(buzzerPin, buzzerFrequency, buzzerTime);
+}
 
 void checkReadings() {
 	
@@ -136,6 +144,8 @@ void checkForSheep() {
 			sheepActive[lane] = false;
 			sheepIndex[lane]++;
 			Serial.println("Sheep passed");
+			
+			beep();
 						
 			if (sheepIndex[lane] >= sheepBuffer)
 			{
@@ -195,6 +205,7 @@ void setup() {
 	
 	pinMode (onLedPin, OUTPUT);
 	pinMode (offLedPin, OUTPUT);
+	pinMode (buzzerPin, OUTPUT);
 	
 	for (int lane = 0; lane < lanes; lane++)
 	{
@@ -210,7 +221,7 @@ void setup() {
 void loop()
 {
     checkReadings();    
-     
+	
     if (checkGameRunning() == true)
     {
         for (int lane = 0; lane < lanes; lane++)
