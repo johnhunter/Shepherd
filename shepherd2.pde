@@ -137,16 +137,19 @@ void checkForSheep() {
 			sheepList[lane][endColumn][sheepIndex[lane]] = millis();
 			sheepActive[lane] = false;
 			sheepIndex[lane]++;
-			Serial.println("Sheep passed");
 			
+			Serial.println("Sheep passed");
 			beep();
 						
 			if (sheepIndex[lane] >= sheepBuffer)
 			{
 				sheepIndex[lane] = 0;
-				sheepList[lane][startColumn][0] = 0;
-				sheepList[lane][endColumn][0] = 0;	
 			}
+			
+			//reset values
+			Serial.println("Reset values");
+			sheepList[lane][startColumn][sheepIndex[lane]] = 0;
+			sheepList[lane][endColumn][sheepIndex[lane]] = 0;
 		}
 		else {
 			Serial.println("No sheep");
@@ -266,8 +269,8 @@ void loop()
             }
         else {
 			checkForSheep();
-			readingsPrint();
-			//sheepListPrint();
+			//readingsPrint();
+			sheepListPrint();
 			//fireSolenoids();
 		}
 	}
