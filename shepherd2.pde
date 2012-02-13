@@ -52,7 +52,7 @@ const int holdTime = 500;
 
 const int onLedPin = 8;
 const int offLedPin = 9;
-const int ldrPin[lanes] = {A0, A1, A2};
+const int ldrPin[lanes] = {A0, A2, A1};
 const int solenoidPin[lanes][2] = {3,4,5,6,7,8};
 const int buzzerPin = 10;
 
@@ -61,6 +61,10 @@ const int buzzerPin = 10;
 
 void beep() {
 	tone(buzzerPin, buzzerFrequency, buzzerTime);
+}
+
+void solenoidBeep() {
+	tone(buzzerPin, buzzerFrequency / 2, buzzerTime);
 }
 
 void checkReadings() {
@@ -192,45 +196,63 @@ void averagesPrint (){
 
 
 void fireSolenoids() {
-	Serial.println("Checking whether to fire solenoids");
-	
-	unsigned long sheepSpottedTime, sheepEndedTime, sheepExpectedFirst, sheepExpectedSecond = 0;
+	Serial.println();
+	Serial.println("Check solenoids");
+		
 	for (int lane = 0; lane < lanes; lane++)
 	{
 		// calculate speeds and times
-		unsigned sheepSpottedTime = sheepList[lane][startColumn][sheepNext[lane]];
+		unsigned long sheepSpottedTime = sheepList[lane][startColumn][sheepNext[lane]];
 		unsigned long sheepEndedTime = sheepList[lane][endColumn][sheepNext[lane]];
-		
-		int speed = (sheepEndedTime - sheepSpottedTime) / sheepWidth;
-		unsigned long sheepExpectedFirst = sheepEndedTime + (firstDistance[lane] / speed);
-		unsigned long sheepExpectedSecond = sheepEndedTime + (secondDistance[lane] / speed);
-		
-		if (millis() > sheepExpectedFirst && millis() < (sheepExpectedFirst + holdTime)) {
-			digitalWrite(solenoidPin[lane][0], HIGH);
-			Serial.println("Solenoid down");
-		}
-			else if (millis() > (sheepExpectedFirst + holdTime)){
+	
+		if (sheepEndedTime != 0)
+		{
+			unsigned long speed = (sheepEndedTime - sheepSpottedTime) / sheepWidth;
+
+			unsigned long sheepExpectedFirst = sheepEndedTime + (firstDistance[lane] / speed);
+			unsigned long sheepExpectedSecond = sheepEndedTime + (secondDistance[lane] / speed);
+			
+			//serial out
+			Serial.print("sheepSpottedTime = ");
+			Serial.println(sheepSpottedTime);
+			Serial.print("sheepEndedTime = ");
+			Serial.println(sheepEndedTime);
+			Serial.print("speed = ");
+			Serial.println(speed);
+			Serial.print("sheepExpectedFirst = ");
+			Serial.println(sheepEndedTime);
+			Serial.print("sheepExpectedSecond = ");
+			Serial.println(speed);
+
+			if (millis() > sheepExpectedFirst && millis() < (sheepExpectedFirst + holdTime)) {
+				digitalWrite(solenoidPin[lane][0], HIGH);
+				Serial.println("Solenoid down");
+				solenoidBeep();
+			}
+			
+			else if (millis() > (sheepExpectedFirst + holdTime)) {
 			digitalWrite(solenoidPin[lane][0], LOW);
 			Serial.println("Solenoid up");
-		}
-		
-		if (millis() > sheepExpectedSecond && millis() < (sheepExpectedSecond + holdTime)) {
-			digitalWrite(solenoidPin[lane][1], HIGH);
-			Serial.println("Solenoid down");
-			
-		}
-		
-		else if (millis() > (sheepExpectedSecond + holdTime)) {
-			digitalWrite(solenoidPin[lane][1], LOW);
-			Serial.println("Solenoid down");
-			
-			sheepNext[lane]++;
-			
-			if (sheepNext[lane] >= sheepBuffer) {
-				sheepIndex[lane] = 0;
+			}
+
+			if (millis() > sheepExpectedSecond && millis() < (sheepExpectedSecond + holdTime)) {
+				digitalWrite(solenoidPin[lane][1], HIGH);
+				Serial.println("Solenoid down");
+				solenoidBeep();
+			}
+
+			else if (millis() > (sheepExpectedSecond + holdTime)) {
+				digitalWrite(solenoidPin[lane][1], LOW);
+				Serial.println("Solenoid up");
+				
+				sheepNext[lane]++;
+
+				if (sheepNext[lane] >= sheepBuffer) {
+					sheepIndex[lane] = 0;
+				}
 			}
 		}
-	}	
+	}
 }
 
 /*SETUP*/
@@ -271,7 +293,7 @@ void loop()
 			checkForSheep();
 			//readingsPrint();
 			sheepListPrint();
-			//fireSolenoids();
+			fireSolenoids();
 		}
 	}
 }
