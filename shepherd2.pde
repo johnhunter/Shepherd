@@ -35,7 +35,7 @@ const int sheepBuffer = 5;
 
 boolean sheepActive[lanes] = {false};
 
-int sheepList[lanes][2][sheepBuffer] = {0};
+unsigned long sheepList[lanes][2][sheepBuffer] = {0};
 int startColumn = 0; 
 int endColumn = 1;
 
@@ -80,10 +80,6 @@ void checkReadings() {
 		// calculate the average:
 		average[lane] = total[lane] / numReadings;
 		
-		Serial.print(readings[lane][index]);
-		Serial.print(";");
-		Serial.print(average[lane]);
-		Serial.print(";");
 	}
 	
 	// advance to the next position in the array:  
@@ -152,6 +148,22 @@ void checkForSheep() {
 				sheepIndex[lane] = 0;
 			}
 		}
+	}
+}
+
+void sheepListPrint () {
+	Serial.println("Sheep Times @");
+	Serial.print(millis());
+	for (int lane = 0; lane < lanes; lane++)
+	{
+		
+		Serial.println();
+		Serial.print(sheepIndex[lane]);
+		Serial.print(";");
+		Serial.print(sheepList[lane][startColumn][sheepIndex[lane]]);
+		Serial.print(";");
+		Serial.print(sheepList[lane][endColumn][sheepIndex[lane]]);
+		Serial.print(";");
 	}
 }
 
@@ -232,7 +244,8 @@ void loop()
             }
         }
     	checkForSheep();
-        fireSolenoids();
+		sheepListPrint();
+        //fireSolenoids();
 	}
 }
 
