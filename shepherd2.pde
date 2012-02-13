@@ -20,7 +20,7 @@ int average [lanes]= {0};                // the average
 /*GAME STARTED*/
 
 const int lowThreshold = 100;
-const int highThreshold = 600;
+const int highThreshold = 750;
 
 unsigned long timeGameStarted = 0;
 
@@ -144,6 +144,8 @@ void checkForSheep() {
 			if (sheepIndex[lane] >= sheepBuffer)
 			{
 				sheepIndex[lane] = 0;
+				sheepList[lane][startColumn][0] = 0;
+				sheepList[lane][endColumn][0] = 0;	
 			}
 		}
 		else {
@@ -259,14 +261,14 @@ void loop()
             {
 				for (int lane = 0; lane < lanes; lane++) {
                 	baselineThresholds[lane] = average[lane];
-					averagesPrint();
+					//averagesPrint();
 				}
             }
         else {
 			checkForSheep();
 			readingsPrint();
-			sheepListPrint();
-			fireSolenoids();
+			//sheepListPrint();
+			//fireSolenoids();
 		}
 	}
 }
