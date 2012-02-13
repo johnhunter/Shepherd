@@ -11,7 +11,6 @@ const int buzzerTime = 200;
 /*READING VALUES*/
 
 const int numReadings = 10;
-
 int latestReadings[lanes] = {0};
 int readings[lanes][numReadings] = {0};      // the readings from the analog input
 int index = 0;                  // the index of the current reading
@@ -66,7 +65,6 @@ void beep() {
 
 void checkReadings() {
 	
-	Serial.println(millis());
 	
 	for (int lane = 0; lane < lanes; lane++) {
 		
@@ -124,19 +122,19 @@ void checkForSheep() {
 	
 	for (int lane = 0; lane < lanes; lane++)
 	{
-		if (latestReadings[lane] > (baselineThresholds[lane] + sheepThreshold))
+		if (sheepActive[lane] == false && latestReadings[lane] > (baselineThresholds[lane] + sheepThreshold))
 		{
 			//create sheep
 			sheepActive[lane] = true;
 			sheepList[lane][startColumn][sheepIndex[lane]] = millis();
 			sheepList[lane][endColumn][sheepIndex[lane]] = 0;
-			
+			Serial.println("Sheep arrived");	
 		}
 		
-		if (sheepActive[lane] == true && latestReadings[lane] < baselineThresholds[lane] + sheepThreshold)
+		else if (sheepActive[lane] == true && latestReadings[lane] < baselineThresholds[lane] + sheepThreshold)
 		{
 			//end sheep
-			sheepList[lane][startColumn][sheepIndex[lane]] = millis();
+			sheepList[lane][endColumn][sheepIndex[lane]] = millis();
 			sheepActive[lane] = false;
 			sheepIndex[lane]++;
 			Serial.println("Sheep passed");
@@ -148,15 +146,17 @@ void checkForSheep() {
 				sheepIndex[lane] = 0;
 			}
 		}
+		else {
+			Serial.println("No sheep");
+		}
 	}
 }
 
 void sheepListPrint () {
-	Serial.println("Sheep Times @");
+	Serial.print("Sheep Times @ ");
 	Serial.print(millis());
 	for (int lane = 0; lane < lanes; lane++)
 	{
-		
 		Serial.println();
 		Serial.print(sheepIndex[lane]);
 		Serial.print(";");
@@ -166,6 +166,25 @@ void sheepListPrint () {
 		Serial.print(";");
 	}
 }
+
+void readingsPrint () {
+	Serial.print("Readings @ ");
+	Serial.println(millis());
+	for (int lane = 0; lane < lanes; lane++)
+	{
+		Serial.println(latestReadings[lane]);
+	}
+}
+
+void averagesPrint (){
+	Serial.print("Averages @ ");
+	Serial.println(millis());
+	for (int lane = 0; lane < lanes; lane++)
+	{
+		Serial.println(average[lane]);
+	}
+}
+
 
 void fireSolenoids() {
 	Serial.println("Checking whether to fire solenoids");
@@ -236,16 +255,19 @@ void loop()
 	
     if (checkGameRunning() == true)
     {
-        for (int lane = 0; lane < lanes; lane++)
-        {
-            if (millis() < (timeGameStarted + startPeriod))
+        if (millis() < (timeGameStarted + startPeriod))
             {
-                baselineThresholds[lane] = average[lane];
+				for (int lane = 0; lane < lanes; lane++) {
+                	baselineThresholds[lane] = average[lane];
+					averagesPrint();
+				}
             }
-        }
-    	checkForSheep();
-		sheepListPrint();
-        //fireSolenoids();
+        else {
+			checkForSheep();
+			readingsPrint();
+			sheepListPrint();
+			fireSolenoids();
+		}
 	}
 }
 
