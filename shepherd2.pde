@@ -118,6 +118,7 @@ boolean checkGameRunning() {
 	timeGameStarted = 0;
 	digitalWrite(onLedPin, LOW);
 	digitalWrite(offLedPin, HIGH);
+		
 	return (false);
 }
 
@@ -285,7 +286,13 @@ void loop()
         if (millis() < (timeGameStarted + startPeriod))
             {
 				for (int lane = 0; lane < lanes; lane++) {
+					Serial.println("Starting");
                 	baselineThresholds[lane] = average[lane];
+					//resetting variables - needs tidying up
+					sheepIndex[lane] = 0;
+					sheepNext[lane] = 0;
+					sheepList[lane][startColumn][sheepIndex[lane]] = 0;
+					sheepList[lane][endColumn][sheepIndex[lane]] = 0;
 					//averagesPrint();
 				}
             }
@@ -293,7 +300,7 @@ void loop()
 			checkForSheep();
 			//readingsPrint();
 			sheepListPrint();
-			fireSolenoids();
+			//fireSolenoids();
 		}
 	}
 }
