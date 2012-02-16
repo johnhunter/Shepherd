@@ -1,21 +1,19 @@
 /*SHEPHERD - Leap Sheep Cheating Machine*/
 
-
 /*BUZZER*/
 
 const int buzzerFrequency  = 500; 
 const int buzzerTime = 200;
-
 
 /*READING VALUES*/
 
 const int lanes = 3;
 const int numReadings = 10;
 int latestReadings[lanes] = {0};
-int readings[lanes][numReadings] = {0};      // the readings from the analog input
-int index = 0;                  // the index of the current reading
-int total [lanes] = {0};                  // the running total
-int average [lanes]= {0};                // the average
+int readings[lanes][numReadings] = {0};
+int index = 0;
+int total [lanes] = {0};
+int average [lanes]= {0};
 
 /*GAME STARTED*/
 
@@ -45,9 +43,8 @@ int sheepNext[lanes] = {0};
 
 /*SOLENOID FIRER*/
 
-const int sheepWidth = {5};
-const int firstDistance [lanes] = {30, 30, 30};
-const int secondDistance[lanes] = {15, 15, 15};
+const float firstDistance [lanes] = {1, 1, 1};
+const float secondDistance[lanes] = {2, 2, 2};
 const int holdTime = 500;
 
 
@@ -72,14 +69,19 @@ void resetSolenoids() {
 }
 
 void testSolenoids(){
-	for (int lane = 1; lane < 2; lane++)
+	for (int lane = 0; lane < lanes; lane++)
 	{
 		Serial.println("testing lane solenoid");
 		Serial.println(lane);
+		for (int i = 0; i < lane; i++)
+		{
+			beep();
+		}
 		digitalWrite(solenoidPin[lane][0], HIGH);
 		Serial.println(solenoidPin[lane][0]);
 		delay(1000);
 		digitalWrite(solenoidPin[lane][0], LOW);
+		solenoidBeep();
 		Serial.println(solenoidPin[lane][1]);	
 		digitalWrite(solenoidPin[lane][1], HIGH);
 		delay(1000);
@@ -230,26 +232,29 @@ void averagesPrint (){
 void fireSolenoids() {
 		
 	for (int lane = 0; lane < lanes; lane++)
-	{
-		// 		Serial.print("sheepSpottedTime = ");
-		// 		Serial.println(sheepSpottedTime);
-		// 		Serial.print("sheepEndedTime = ");
-		// 		Serial.println(sheepEndedTime);
-		// 		Serial.print("speed = ");
-		// 		Serial.println(speed);
-		// 		Serial.print("sheepExpectedFirst = ");
-		// 		Serial.println(sheepEndedTime);
-		// 		Serial.print("sheepExpectedSecond = ");
-		// 		Serial.println(speed);
+	{		
 		// calculate speeds and times
 		unsigned long sheepSpottedTime = sheepList[lane][startColumn][sheepNext[lane]];
 		unsigned long sheepEndedTime = sheepList[lane][endColumn][sheepNext[lane]];
-	
+		
 		if (sheepEndedTime != 0)
 		{
-			unsigned long speed = (sheepEndedTime - sheepSpottedTime) / sheepWidth;
-			unsigned long sheepExpectedFirst = sheepEndedTime + (firstDistance[lane] / speed);
-			unsigned long sheepExpectedSecond = sheepEndedTime + (secondDistance[lane] / speed);
+			unsigned long sheepTime = (sheepEndedTime - sheepSpottedTime);
+			unsigned long sheepExpectedFirst = sheepEndedTime + (firstDistance[lane] * sheepTime);
+			unsigned long sheepExpectedSecond = sheepEndedTime + (secondDistance[lane] * sheepTime);
+			
+			/*
+			Serial.print("sheepSpottedTime = ");
+			Serial.println(sheepSpottedTime);
+			Serial.print("sheepEndedTime = ");
+			Serial.println(sheepEndedTime);
+			Serial.print("sheepTime = ");
+			Serial.println(sheepTime);
+			Serial.print("sheepExpectedFirst = ");
+			Serial.println(sheepExpectedFirst);
+			Serial.print("sheepExpectedSecond = ");
+			Serial.println(sheepExpectedSecond);
+			*/
 			
 			if (millis() > sheepExpectedFirst && millis() < (sheepExpectedFirst + holdTime)) {
 				digitalWrite(solenoidPin[lane][0], HIGH);
@@ -307,6 +312,7 @@ void loop()
 	
 	//testSolenoids();
 	
+	
     checkReadings();    
           	
              if (checkGameRunning() == true)
@@ -328,7 +334,7 @@ void loop()
           	
           			checkForSheep();
           			//readingsPrint();
-          			sheepListPrint();
+          			//sheepListPrint();
           			fireSolenoids();
           		}
           	}
