@@ -71,21 +71,25 @@ void resetSolenoids() {
 void testSolenoids(){
 	for (int lane = 0; lane < lanes; lane++)
 	{
-		Serial.println("testing lane solenoid");
-		Serial.println(lane);
-		for (int i = 0; i < lane; i++)
+		for (int i = 0; i <= lane; i++)
 		{
 			beep();
+			delay(500);
 		}
 		digitalWrite(solenoidPin[lane][0], HIGH);
-		Serial.println(solenoidPin[lane][0]);
 		delay(1000);
+		
 		digitalWrite(solenoidPin[lane][0], LOW);
-		solenoidBeep();
-		Serial.println(solenoidPin[lane][1]);	
+		
+		for (int i = 0; i <= lane; i++)
+		{
+			solenoidBeep();
+			delay(500);
+		}
 		digitalWrite(solenoidPin[lane][1], HIGH);
 		delay(1000);
 		digitalWrite(solenoidPin[lane][1], LOW);
+		delay(1000);
 	}
 }
 void beep() {
@@ -311,8 +315,7 @@ void loop()
 {
 	
 	//testSolenoids();
-	
-	
+
     checkReadings();    
           	
              if (checkGameRunning() == true)
